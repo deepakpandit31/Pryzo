@@ -18,3 +18,7 @@ export async function GET(request) {
   // Return the user to an error page with instructions
   return NextResponse.redirect(new URL("/error", request.url));
 }
+
+
+
+// curl.exe -X POST https://pryzo.vercel.app/api/cron/check-prices -H "Authorization: Bearer 2e1c6587cb89b51e5f9d273c405c6228e1706d9aacf3e5dfd4a75783b5400d95"
