@@ -58,34 +58,33 @@ export async function POST(request) {
           .eq("id", product.id);
 
         if (oldPrice !== newPrice) {
-          await supabase.from("price_history").insert({
-            product_id: product.id,
-            price: newPrice,
-            currency: productData.currencyCode || product.currency,
-          });
+  await supabase.from("price_history").insert({
+    product_id: product.id,
+    price: newPrice,
+    currency: productData.currencyCode || product.currency,
+  });
 
-          results.priceChanges++;
+  results.priceChanges++;
 
-          if (newPrice < oldPrice) {
-            const {
-              data: { user },
-            } = await supabase.auth.admin.getUserById(product.user_id);
+  // send alert only if price dropped
+  if (newPrice < oldPrice && product.current_price !== newPrice) {
+    const { data: { user } } =
+      await supabase.auth.admin.getUserById(product.user_id);
 
-            if (user?.email) {
-              const emailResult = await sendPriceDropAlert(
-                user.email,
-                product,
-                oldPrice,
-                newPrice
-              );
+    if (user?.email) {
+      const emailResult = await sendPriceDropAlert(
+        user.email,
+        product,
+        oldPrice,
+        newPrice
+      );
 
-              if (emailResult.success) {
-                results.alertsSent++;
-              }
-            }
-          }
-        }
-
+      if (emailResult.success) {
+        results.alertsSent++;
+      }
+    }
+  }
+}
         results.updated++;
       } catch (error) {
         console.error(`Error processing product ${product.id}:`, error);
